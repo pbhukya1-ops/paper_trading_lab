@@ -28,6 +28,16 @@ class PaperEngine:
     def trade_history(self):
         return tuple(self._trade_history)
 
+    @property
+    def account_snapshot(self):
+        return {
+            "starting_capital": self.starting_capital,
+            "capital": self.capital,
+            "open_position_count": self.open_position_count,
+            "completed_trade_count": len(self._trade_history),
+            "realized_pnl": sum(trade.realized_pnl for trade in self._trade_history),
+        }
+
     def calculate_position_size(self, entry_price: float, stop_price: float) -> float:
         return self.risk_manager.calculate_position_size(
             capital=self.capital,

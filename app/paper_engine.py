@@ -22,6 +22,11 @@ class PaperEngine:
         self.open_position_count = 0
         self.current_position = None
         self._entry_time = None
+        self._trade_history = []
+
+    @property
+    def trade_history(self):
+        return tuple(self._trade_history)
 
     def calculate_position_size(self, entry_price: float, stop_price: float) -> float:
         return self.risk_manager.calculate_position_size(
@@ -78,5 +83,6 @@ class PaperEngine:
         self._entry_time = None
         self.open_position_count = 0
         self.capital += trade.realized_pnl
+        self._trade_history.append(trade)
 
         return trade

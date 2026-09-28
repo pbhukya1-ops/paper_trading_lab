@@ -45,6 +45,27 @@ class PaperEngine:
             stop_price=stop_price,
         )
 
+    def unrealized_pnl(self, current_price: float) -> float:
+        """Return descriptive unrealized P&L for the current paper position."""
+        if current_price <= 0:
+            raise ValueError("current_price must be greater than zero")
+
+        if self.current_position is None:
+            return 0.0
+
+        entry_price = self.current_position.target_geometry.entry_price
+        quantity = self.current_position.quantity
+
+        if self.current_position.direction == "LONG_GEOMETRY":
+            return (current_price - entry_price) * quantity
+
+        if self.current_position.direction == "SHORT_GEOMETRY":
+            return (entry_price - current_price) * quantity
+
+        raise ValueError(
+            f"Unsupported position direction: {self.current_position.direction}"
+        )
+
     def can_open_position(self) -> bool:
         return self.risk_manager.can_open_position(self.open_position_count)
 

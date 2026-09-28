@@ -23,6 +23,12 @@ class PaperEngine:
         self.current_position = None
         self._entry_time = None
         self._trade_history = []
+        self._peak_capital = self.starting_capital
+
+    @property
+    def drawdown(self) -> float:
+        """Return descriptive realized-capital drawdown from the peak."""
+        return max(0.0, self._peak_capital - self.capital)
 
     @property
     def trade_history(self):
@@ -173,6 +179,7 @@ class PaperEngine:
         self._entry_time = None
         self.open_position_count = 0
         self.capital += trade.realized_pnl
+        self._peak_capital = max(self._peak_capital, self.capital)
         self._trade_history.append(trade)
 
         return trade

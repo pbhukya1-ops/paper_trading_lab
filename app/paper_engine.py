@@ -76,6 +76,30 @@ class PaperEngine:
             stop_price=stop_price,
         )
 
+    @property
+    def performance_snapshot(self):
+        """Return descriptive aggregate statistics for completed paper trades."""
+        outcomes = self.trade_outcomes
+        completed_trade_count = outcomes["completed_trade_count"]
+        winning_trade_count = outcomes["winning_trade_count"]
+        losing_trade_count = outcomes["losing_trade_count"]
+        breakeven_trade_count = (
+            completed_trade_count
+            - winning_trade_count
+            - losing_trade_count
+        )
+
+        return {
+            "completed_trade_count": completed_trade_count,
+            "winning_trade_count": winning_trade_count,
+            "losing_trade_count": losing_trade_count,
+            "breakeven_trade_count": breakeven_trade_count,
+            "realized_pnl": sum(
+                trade.realized_pnl for trade in self._trade_history
+            ),
+            "win_rate": self.win_rate,
+        }
+
     def unrealized_pnl(self, current_price: float) -> float:
         """Return descriptive unrealized P&L for the current paper position."""
         if current_price <= 0:

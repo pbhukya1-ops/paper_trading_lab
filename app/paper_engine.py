@@ -54,6 +54,21 @@ class PaperEngine:
             "realized_pnl": sum(trade.realized_pnl for trade in self._trade_history),
         }
 
+    @property
+    def win_rate(self) -> float:
+        """Return the descriptive completed-trade win rate as a percentage."""
+        outcomes = self.trade_outcomes
+        completed_trade_count = outcomes["completed_trade_count"]
+
+        if completed_trade_count == 0:
+            return 0.0
+
+        return (
+            outcomes["winning_trade_count"]
+            / completed_trade_count
+            * 100.0
+        )
+
     def calculate_position_size(self, entry_price: float, stop_price: float) -> float:
         return self.risk_manager.calculate_position_size(
             capital=self.capital,

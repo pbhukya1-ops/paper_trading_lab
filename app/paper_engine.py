@@ -66,6 +66,10 @@ class PaperEngine:
             f"Unsupported position direction: {self.current_position.direction}"
         )
 
+    def equity(self, current_price: float) -> float:
+        """Return descriptive current paper equity at the supplied price."""
+        return self.capital + self.unrealized_pnl(current_price)
+
     def can_open_position(self) -> bool:
         return self.risk_manager.can_open_position(self.open_position_count)
 

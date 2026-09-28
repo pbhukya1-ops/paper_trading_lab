@@ -29,6 +29,22 @@ class PaperEngine:
         return tuple(self._trade_history)
 
     @property
+    def trade_outcomes(self):
+        """Return descriptive completed-trade outcome counts."""
+        winning_trade_count = sum(
+            trade.realized_pnl > 0 for trade in self._trade_history
+        )
+        losing_trade_count = sum(
+            trade.realized_pnl < 0 for trade in self._trade_history
+        )
+
+        return {
+            "completed_trade_count": len(self._trade_history),
+            "winning_trade_count": winning_trade_count,
+            "losing_trade_count": losing_trade_count,
+        }
+
+    @property
     def account_snapshot(self):
         return {
             "starting_capital": self.starting_capital,

@@ -83,6 +83,25 @@ class PaperEngine:
         )
 
     @property
+    def profit_factor(self) -> float:
+        """Return descriptive realized gross-profit/gross-loss ratio."""
+        gross_profit = sum(
+            trade.realized_pnl
+            for trade in self._trade_history
+            if trade.realized_pnl > 0
+        )
+        gross_loss = sum(
+            -trade.realized_pnl
+            for trade in self._trade_history
+            if trade.realized_pnl < 0
+        )
+
+        if gross_loss == 0:
+            return 0.0
+
+        return gross_profit / gross_loss
+
+    @property
     def performance_snapshot(self):
         """Return descriptive aggregate statistics for completed paper trades."""
         outcomes = self.trade_outcomes

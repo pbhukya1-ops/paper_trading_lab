@@ -84,11 +84,17 @@ class PaperEngine:
         self._trade_history = []
         self._peak_capital = self.starting_capital
 
-    def calculate_position_size(self, entry_price: float, stop_price: float) -> float:
+    def calculate_position_size(
+        self,
+        entry_price: float,
+        stop_price: float,
+        direction: str = "LONG_GEOMETRY",
+    ) -> float:
         return self.risk_manager.calculate_position_size(
             capital=self.capital,
             entry_price=entry_price,
             stop_price=stop_price,
+            direction=direction,
         )
 
     @property

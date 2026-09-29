@@ -63,6 +63,61 @@ def test_zero_risk_distance_is_rejected():
         )
 
 
+def test_short_position_size_uses_risk_budget_divided_by_risk_distance():
+    manager = RiskManager(
+        RiskParameters(
+            max_risk_per_trade=0.01,
+            max_open_positions=1,
+        )
+    )
+
+    # Capital = 100,000
+    # Risk budget = 1,000
+    # Entry = 100, Stop = 105
+    # Risk distance = 5
+    # Position size = 1,000 / 5 = 200
+    assert manager.calculate_position_size(
+        capital=100000.0,
+        entry_price=100.0,
+        stop_price=105.0,
+        direction="SHORT_GEOMETRY",
+    ) == pytest.approx(200.0)
+
+
+def test_short_wrong_side_stop_is_rejected():
+    manager = RiskManager(
+        RiskParameters(
+            max_risk_per_trade=0.01,
+            max_open_positions=1,
+        )
+    )
+
+    with pytest.raises(ValueError, match="Short geometry requires stop above entry"):
+        manager.calculate_position_size(
+            capital=100000.0,
+            entry_price=100.0,
+            stop_price=95.0,
+            direction="SHORT_GEOMETRY",
+        )
+
+
+def test_invalid_position_size_direction_is_rejected():
+    manager = RiskManager(
+        RiskParameters(
+            max_risk_per_trade=0.01,
+            max_open_positions=1,
+        )
+    )
+
+    with pytest.raises(ValueError, match="Unsupported direction"):
+        manager.calculate_position_size(
+            capital=100000.0,
+            entry_price=100.0,
+            stop_price=95.0,
+            direction="INVALID",
+        )
+
+
 def test_negative_risk_distance_is_rejected_for_long_geometry():
     manager = RiskManager(
         RiskParameters(

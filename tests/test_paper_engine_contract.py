@@ -40,6 +40,26 @@ def test_engine_position_size_uses_risk_manager(paper_engine_class):
     assert size == expected
 
 
+def test_engine_position_size_supports_short_geometry(paper_engine_class):
+    engine = paper_engine_class()
+
+    size = engine.calculate_position_size(
+        entry_price=100.0,
+        stop_price=105.0,
+        direction="SHORT_GEOMETRY",
+    )
+
+    expected = engine.risk_manager.calculate_position_size(
+        capital=STARTING_CAPITAL,
+        entry_price=100.0,
+        stop_price=105.0,
+        direction="SHORT_GEOMETRY",
+    )
+
+    assert size == expected
+    assert size == pytest.approx(200.0)
+
+
 def test_engine_respects_open_position_limit(paper_engine_class):
     engine = paper_engine_class()
 

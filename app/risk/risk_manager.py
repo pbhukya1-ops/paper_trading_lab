@@ -82,16 +82,23 @@ class RiskManager:
         capital: float,
         entry_price: float,
         stop_price: float,
+        direction: str = "LONG_GEOMETRY",
     ) -> float:
         """
-        Calculate descriptive long-position size from capital and stop distance.
+        Calculate descriptive paper position size from explicit price geometry.
 
         Position size = risk budget / risk distance.
 
-        Contract:
+        LONG_GEOMETRY:
             stop_price < entry_price
-        """
+            risk_distance = entry_price - stop_price
 
+        SHORT_GEOMETRY:
+            stop_price > entry_price
+            risk_distance = stop_price - entry_price
+
+        No orders are placed and no broker functionality is involved.
+        """
         if capital <= 0:
             raise ValueError("capital must be greater than zero")
 
@@ -105,12 +112,29 @@ class RiskManager:
                 "stop_price must be greater than zero"
             )
 
-        if stop_price >= entry_price:
+        if entry_price == stop_price:
             raise ValueError(
-                "risk distance requires stop below entry"
+                "risk distance must be greater than zero"
             )
 
-        risk_distance = float(entry_price - stop_price)
+        if direction == "LONG_GEOMETRY":
+            if stop_price > entry_price:
+                raise ValueError(
+                    "Long geometry requires stop below entry"
+                )
+            risk_distance = float(entry_price - stop_price)
+
+        elif direction == "SHORT_GEOMETRY":
+            if stop_price < entry_price:
+                raise ValueError(
+                    "Short geometry requires stop above entry"
+                )
+            risk_distance = float(stop_price - entry_price)
+
+        else:
+            raise ValueError(
+                f"Unsupported direction: {direction}"
+            )
 
         if risk_distance <= 0:
             raise ValueError(

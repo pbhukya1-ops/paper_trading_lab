@@ -60,6 +60,60 @@ def test_engine_position_size_supports_short_geometry(paper_engine_class):
     assert size == pytest.approx(200.0)
 
 
+def test_engine_short_position_lifecycle_updates_capital_and_history(
+    paper_engine_class,
+):
+    from datetime import datetime
+
+    from app.position import Position
+    from app.strategy.targets import TargetGeometry
+
+    engine = paper_engine_class()
+
+    geometry = TargetGeometry(
+        direction="SHORT_GEOMETRY",
+        reference_price=100.0,
+        entry_price=100.0,
+        stop_price=105.0,
+        target_price=90.0,
+        risk_distance=5.0,
+        reward_distance=10.0,
+        reward_risk_ratio=2.0,
+    )
+    position = Position(
+        direction="SHORT_GEOMETRY",
+        quantity=10.0,
+        target_geometry=geometry,
+    )
+
+    entry_time = datetime(2026, 1, 1, 10, 0)
+    exit_time = datetime(2026, 1, 1, 11, 0)
+
+    opened = engine.open_position(position, entry_time)
+
+    assert opened == position
+    assert engine.current_position == position
+    assert engine.open_position_count == 1
+    assert engine.unrealized_pnl(92.0) == pytest.approx(80.0)
+    assert engine.equity(92.0) == pytest.approx(
+        STARTING_CAPITAL + 80.0
+    )
+
+    trade = engine.close_position(
+        exit_price=92.0,
+        exit_time=exit_time,
+    )
+
+    assert trade.position == position
+    assert trade.realized_pnl == pytest.approx(80.0)
+    assert engine.current_position is None
+    assert engine.open_position_count == 0
+    assert engine.capital == pytest.approx(STARTING_CAPITAL + 80.0)
+    assert engine.account_snapshot["realized_pnl"] == pytest.approx(80.0)
+    assert engine.account_snapshot["completed_trade_count"] == 1
+    assert len(engine.trade_history) == 1
+
+
 def test_engine_respects_open_position_limit(paper_engine_class):
     engine = paper_engine_class()
 

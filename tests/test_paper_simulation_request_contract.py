@@ -252,59 +252,6 @@ def test_open_paper_simulation_closes_with_correct_realized_pnl(
         entry_price=entry_price,
         stop_price=stop_price,
         target_price=target_price,
-    )
-
-    request = PaperSimulationRequest(
-        analysis_context=make_analysis_context(),
-        direction=direction,
-        entry_price=entry_price,
-        stop_price=stop_price,
-        target_price=target_price,
-        entry_time=entry_time,
-        target_geometry=geometry,
-    )
-
-    engine = PaperEngine()
-
-    position = open_paper_simulation(engine, request)
-
-    trade = engine.close_position(
-        exit_price=exit_price,
-        exit_time=exit_time,
-    )
-
-    assert position == trade.position
-    assert trade.realized_pnl == pytest.approx(expected_pnl)
-    assert engine.current_position is None
-    assert engine.open_position_count == 0
-    assert engine.account_snapshot["realized_pnl"] == pytest.approx(expected_pnl)
-
-@pytest.mark.parametrize(
-    "direction,entry_price,stop_price,target_price,exit_price,expected_pnl",
-    [
-        ("LONG_GEOMETRY", 100.0, 95.0, 110.0, 108.0, 1600.0),
-        ("SHORT_GEOMETRY", 100.0, 105.0, 90.0, 92.0, 1600.0),
-    ],
-)
-def test_open_paper_simulation_closes_with_correct_realized_pnl(
-    direction,
-    entry_price,
-    stop_price,
-    target_price,
-    exit_price,
-    expected_pnl,
-):
-    from app.paper_engine import PaperEngine
-    from app.paper_simulation import open_paper_simulation
-
-    entry_time = datetime(2026, 1, 2, 10, 0, 0)
-    exit_time = datetime(2026, 1, 2, 10, 15, 0)
-
-    geometry = TargetGeometry(
-        direction=direction,
-        entry_price=entry_price,
-        stop_price=stop_price,
-        target_price=target_price,
         reference_price=entry_price,
         risk_distance=abs(entry_price - stop_price),
         reward_distance=abs(target_price - entry_price),

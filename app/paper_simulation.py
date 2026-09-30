@@ -5,6 +5,7 @@ from datetime import datetime
 
 from app.strategy.analysis_context import StrategyAnalysisContext
 from app.strategy.targets import TargetGeometry
+from app.position import Position
 
 
 @dataclass(frozen=True)
@@ -58,9 +59,8 @@ class PaperSimulationRequest:
 def open_paper_simulation(
     engine,
     request: PaperSimulationRequest,
-) -> object:
+) -> Position:
     """Open one explicitly requested paper position in the simulation engine."""
-    from app.position import Position
 
     if not engine.paper_only:
         raise RuntimeError("Paper simulation requires a paper-only engine")

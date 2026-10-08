@@ -282,3 +282,42 @@ def test_open_paper_simulation_closes_with_correct_realized_pnl(
     assert engine.current_position is None
     assert engine.open_position_count == 0
     assert engine.account_snapshot["realized_pnl"] == pytest.approx(expected_pnl)
+
+
+def test_open_paper_simulation_rejects_non_paper_engine():
+    from app.paper_simulation import open_paper_simulation
+
+    context = make_analysis_context()
+    geometry = TargetGeometry(
+        direction="LONG_GEOMETRY",
+        entry_price=100.0,
+        stop_price=95.0,
+        target_price=110.0,
+        reference_price=100.0,
+        risk_distance=5.0,
+        reward_distance=10.0,
+        reward_risk_ratio=2.0,
+    )
+    request = PaperSimulationRequest(
+        analysis_context=context,
+        direction="LONG_GEOMETRY",
+        entry_price=100.0,
+        stop_price=95.0,
+        target_price=110.0,
+        entry_time=datetime(2026, 10, 7, 10, 0, 0),
+        target_geometry=geometry,
+    )
+
+    class NonPaperEngine:
+        paper_only = False
+
+    with pytest.raises(RuntimeError, match="paper-only engine"):
+        open_paper_simulation(NonPaperEngine(), request)
+
+
+def test_open_paper_simulation_rejects_wrong_request_type():
+    from app.paper_engine import PaperEngine
+    from app.paper_simulation import open_paper_simulation
+
+    with pytest.raises(TypeError, match="PaperSimulationRequest"):
+        open_paper_simulation(PaperEngine(), object())

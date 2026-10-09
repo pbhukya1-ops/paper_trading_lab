@@ -121,3 +121,54 @@ def test_report_contains_no_order_execution_api():
     }
 
     assert forbidden.isdisjoint(set(dir(report)))
+
+def test_all_losing_trades_have_zero_profit_factor_without_gains():
+    report = evaluate_trades(
+        (
+            make_trade("LONG_GEOMETRY", 97.0),
+            make_trade("SHORT_GEOMETRY", 103.0),
+        )
+    )
+
+    assert report.completed_trade_count == 2
+    assert report.winning_trade_count == 0
+    assert report.losing_trade_count == 2
+    assert report.breakeven_trade_count == 0
+    assert report.gross_profit == 0.0
+    assert report.gross_loss == pytest.approx(60.0)
+    assert report.realized_pnl == pytest.approx(-60.0)
+    assert report.win_rate == 0.0
+    assert report.profit_factor == 0.0
+
+
+def test_all_breakeven_trades_have_zero_outcome_metrics():
+    report = evaluate_trades(
+        (
+            make_trade("LONG_GEOMETRY", 100.0),
+            make_trade("SHORT_GEOMETRY", 100.0),
+        )
+    )
+
+    assert report.completed_trade_count == 2
+    assert report.winning_trade_count == 0
+    assert report.losing_trade_count == 0
+    assert report.breakeven_trade_count == 2
+    assert report.realized_pnl == 0.0
+    assert report.win_rate == 0.0
+    assert report.gross_profit == 0.0
+    assert report.gross_loss == 0.0
+    assert report.profit_factor == 0.0
+    assert report.average_realized_pnl == 0.0
+
+
+def test_evaluation_accepts_one_pass_trade_iterable():
+    trades = (
+        make_trade("LONG_GEOMETRY", 108.0),
+        make_trade("LONG_GEOMETRY", 97.0),
+    )
+    report = evaluate_trades(trade for trade in trades)
+
+    assert report.completed_trade_count == 2
+    assert report.realized_pnl == pytest.approx(50.0)
+    assert report.gross_profit == pytest.approx(80.0)
+    assert report.gross_loss == pytest.approx(30.0)

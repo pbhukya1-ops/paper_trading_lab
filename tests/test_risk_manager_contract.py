@@ -198,3 +198,58 @@ def test_position_size_is_descriptive_and_does_not_place_orders():
     )
 
     assert size == pytest.approx(200.0)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [float("nan"), float("inf"), float("-inf")],
+)
+def test_non_finite_risk_percentage_is_rejected(value):
+    with pytest.raises(ValueError):
+        RiskParameters(
+            max_risk_per_trade=value,
+            max_open_positions=1,
+        )
+
+
+@pytest.mark.parametrize(
+    "capital",
+    [float("nan"), float("inf"), float("-inf")],
+)
+def test_non_finite_capital_is_rejected(capital):
+    manager = RiskManager(
+        RiskParameters(
+            max_risk_per_trade=0.01,
+            max_open_positions=1,
+        )
+    )
+
+    with pytest.raises(ValueError):
+        manager.calculate_risk_budget(capital)
+
+
+@pytest.mark.parametrize(
+    ("entry_price", "stop_price"),
+    [
+        (float("nan"), 95.0),
+        (float("inf"), 95.0),
+        (float("-inf"), 95.0),
+        (100.0, float("nan")),
+        (100.0, float("inf")),
+        (100.0, float("-inf")),
+    ],
+)
+def test_non_finite_prices_are_rejected(entry_price, stop_price):
+    manager = RiskManager(
+        RiskParameters(
+            max_risk_per_trade=0.01,
+            max_open_positions=1,
+        )
+    )
+
+    with pytest.raises(ValueError):
+        manager.calculate_position_size(
+            capital=100000.0,
+            entry_price=entry_price,
+            stop_price=stop_price,
+        )

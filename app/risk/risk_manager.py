@@ -18,6 +18,7 @@ It does not:
 """
 
 from dataclasses import dataclass
+from math import isfinite
 
 
 @dataclass(frozen=True)
@@ -31,6 +32,9 @@ class RiskParameters:
         self.validate()
 
     def validate(self) -> None:
+        if not isfinite(self.max_risk_per_trade):
+            raise ValueError("max_risk_per_trade must be finite")
+
         if self.max_risk_per_trade <= 0:
             raise ValueError(
                 "max_risk_per_trade must be greater than zero"
@@ -70,12 +74,18 @@ class RiskManager:
     def calculate_risk_budget(self, capital: float) -> float:
         """Return the maximum monetary risk permitted for one paper position."""
 
+        if not isfinite(capital):
+            raise ValueError("capital must be finite")
+
         if capital <= 0:
             raise ValueError("capital must be greater than zero")
 
-        return float(
+        risk_budget = float(
             capital * self.parameters.max_risk_per_trade
         )
+        if not isfinite(risk_budget):
+            raise ValueError("risk budget must be finite")
+        return risk_budget
 
     def calculate_position_size(
         self,
@@ -99,13 +109,22 @@ class RiskManager:
 
         No orders are placed and no broker functionality is involved.
         """
+        if not isfinite(capital):
+            raise ValueError("capital must be finite")
+
         if capital <= 0:
             raise ValueError("capital must be greater than zero")
+
+        if not isfinite(entry_price):
+            raise ValueError("entry_price must be finite")
 
         if entry_price <= 0:
             raise ValueError(
                 "entry_price must be greater than zero"
             )
+
+        if not isfinite(stop_price):
+            raise ValueError("stop_price must be finite")
 
         if stop_price <= 0:
             raise ValueError(
@@ -143,7 +162,10 @@ class RiskManager:
 
         risk_budget = self.calculate_risk_budget(capital)
 
-        return float(risk_budget / risk_distance)
+        position_size = float(risk_budget / risk_distance)
+        if not isfinite(position_size):
+            raise ValueError("position size must be finite")
+        return position_size
 
     def can_open_position(
         self,

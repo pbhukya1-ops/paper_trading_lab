@@ -7,6 +7,7 @@ backtesting and paper-trading analysis.
 
 from dataclasses import dataclass
 from datetime import datetime
+from math import isfinite
 
 
 @dataclass(frozen=True)
@@ -56,7 +57,9 @@ class Candle:
         }
 
         for name, value in prices.items():
-            if value <= 0:
+            if not isfinite(value):
+                raise ValueError(f"{name} must be finite")
+        if value <= 0:
                 raise ValueError(f"{name} must be greater than zero")
 
         if self.high < max(self.open, self.close):
@@ -68,6 +71,8 @@ class Candle:
         if self.low > self.high:
             raise ValueError("Low cannot be greater than high")
 
+        if not isfinite(self.volume):
+            raise ValueError("volume must be finite")
         if self.volume < 0:
             raise ValueError("Volume cannot be negative")
 

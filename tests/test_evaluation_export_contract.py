@@ -70,3 +70,42 @@ def test_export_payload_rejects_non_finite_json_values():
 
     with pytest.raises(ValueError):
         json.dumps(payload, allow_nan=False)
+
+
+def test_strict_json_serializer_returns_valid_json():
+    from app.evaluation import evaluation_report_to_json
+
+    report = make_report()
+    encoded = evaluation_report_to_json(report)
+    decoded = json.loads(encoded)
+
+    assert isinstance(encoded, str)
+    assert decoded == asdict(report)
+
+
+@pytest.mark.parametrize("non_finite", [float("nan"), float("inf"), float("-inf")])
+def test_strict_json_serializer_rejects_non_finite_values(non_finite):
+    from app.evaluation import evaluation_report_to_json
+
+    report = EvaluationReport(
+        completed_trade_count=0,
+        winning_trade_count=0,
+        losing_trade_count=0,
+        breakeven_trade_count=0,
+        realized_pnl=non_finite,
+        win_rate=0.0,
+        gross_profit=0.0,
+        gross_loss=0.0,
+        profit_factor=0.0,
+        average_realized_pnl=0.0,
+    )
+
+    with pytest.raises(ValueError):
+        evaluation_report_to_json(report)
+
+
+def test_strict_json_serializer_rejects_wrong_input_type():
+    from app.evaluation import evaluation_report_to_json
+
+    with pytest.raises(TypeError):
+        evaluation_report_to_json({"realized_pnl": 0.0})

@@ -1,5 +1,6 @@
 """Paper Trading Lab — Read-only completed-trade evaluation."""
 
+import json
 from dataclasses import asdict, dataclass
 
 from app.trade import Trade
@@ -28,6 +29,12 @@ def evaluation_report_to_dict(report: EvaluationReport) -> dict:
         raise TypeError("report must be an EvaluationReport instance")
 
     return asdict(report)
+
+def evaluation_report_to_json(report: EvaluationReport) -> str:
+    """Serialize a report as strict JSON, rejecting non-finite numbers."""
+    payload = evaluation_report_to_dict(report)
+    return json.dumps(payload, allow_nan=False, sort_keys=True)
+
 
 def evaluate_trades(trades) -> EvaluationReport:
     """Evaluate completed immutable Trade records without modifying them."""

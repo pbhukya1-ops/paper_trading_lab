@@ -8,6 +8,7 @@ from datetime import datetime
 from config import STARTING_CAPITAL
 from app.position import Position
 from app.risk.risk_manager import RiskManager
+from app.evaluation import evaluate_trades
 from app.trade import Trade
 
 
@@ -33,6 +34,11 @@ class PaperEngine:
     @property
     def trade_history(self):
         return tuple(self._trade_history)
+
+    @property
+    def evaluation_report(self):
+        """Return read-only metrics for completed paper trades."""
+        return evaluate_trades(self.trade_history)
 
     @property
     def trade_outcomes(self):

@@ -1,6 +1,6 @@
 """Paper Trading Lab — Read-only completed-trade evaluation."""
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 from app.trade import Trade
 
@@ -20,6 +20,14 @@ class EvaluationReport:
     profit_factor: float
     average_realized_pnl: float
 
+
+
+def evaluation_report_to_dict(report: EvaluationReport) -> dict:
+    """Return a new JSON-compatible dictionary for a report."""
+    if not isinstance(report, EvaluationReport):
+        raise TypeError("report must be an EvaluationReport instance")
+
+    return asdict(report)
 
 def evaluate_trades(trades) -> EvaluationReport:
     """Evaluate completed immutable Trade records without modifying them."""

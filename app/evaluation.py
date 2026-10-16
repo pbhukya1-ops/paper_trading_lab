@@ -53,9 +53,9 @@ def evaluate_trades(trades) -> EvaluationReport:
     losing_trade_count = sum(pnl < 0 for pnl in realized_pnls)
     breakeven_trade_count = sum(pnl == 0 for pnl in realized_pnls)
 
-    realized_pnl = sum(realized_pnls)
-    gross_profit = sum(pnl for pnl in realized_pnls if pnl > 0)
-    gross_loss = sum(-pnl for pnl in realized_pnls if pnl < 0)
+    realized_pnl = float(sum(realized_pnls))
+    gross_profit = float(sum(pnl for pnl in realized_pnls if pnl > 0))
+    gross_loss = float(sum(-pnl for pnl in realized_pnls if pnl < 0))
 
     if completed_trade_count == 0:
         win_rate = 0.0

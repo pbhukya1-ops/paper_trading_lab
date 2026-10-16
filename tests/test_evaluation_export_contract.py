@@ -109,3 +109,107 @@ def test_strict_json_serializer_rejects_wrong_input_type():
 
     with pytest.raises(TypeError):
         evaluation_report_to_json({"realized_pnl": 0.0})
+
+
+def test_export_schema_has_exact_field_names_and_types():
+    from app.evaluation import evaluation_report_to_dict
+
+    payload = evaluation_report_to_dict(make_report())
+
+    expected_types = {
+        "completed_trade_count": int,
+        "winning_trade_count": int,
+        "losing_trade_count": int,
+        "breakeven_trade_count": int,
+        "realized_pnl": float,
+        "win_rate": float,
+        "gross_profit": float,
+        "gross_loss": float,
+        "profit_factor": float,
+        "average_realized_pnl": float,
+    }
+
+    assert set(payload) == set(expected_types)
+    for field, expected_type in expected_types.items():
+        assert type(payload[field]) is expected_type, field
+
+
+def test_json_export_has_exact_schema_after_round_trip():
+    from app.evaluation import evaluation_report_to_json
+
+    decoded = json.loads(evaluation_report_to_json(make_report()))
+
+    assert set(decoded) == {
+        "completed_trade_count",
+        "winning_trade_count",
+        "losing_trade_count",
+        "breakeven_trade_count",
+        "realized_pnl",
+        "win_rate",
+        "gross_profit",
+        "gross_loss",
+        "profit_factor",
+        "average_realized_pnl",
+    }
+    assert type(decoded["completed_trade_count"]) is int
+    for field in (
+        "realized_pnl",
+        "win_rate",
+        "gross_profit",
+        "gross_loss",
+        "profit_factor",
+        "average_realized_pnl",
+    ):
+        assert type(decoded[field]) is float, field
+
+
+def test_export_schema_has_exact_field_names_and_types():
+    from app.evaluation import evaluation_report_to_dict
+
+    payload = evaluation_report_to_dict(make_report())
+
+    expected_types = {
+        "completed_trade_count": int,
+        "winning_trade_count": int,
+        "losing_trade_count": int,
+        "breakeven_trade_count": int,
+        "realized_pnl": float,
+        "win_rate": float,
+        "gross_profit": float,
+        "gross_loss": float,
+        "profit_factor": float,
+        "average_realized_pnl": float,
+    }
+
+    assert set(payload) == set(expected_types)
+    for field, expected_type in expected_types.items():
+        assert type(payload[field]) is expected_type, field
+
+
+def test_json_export_has_exact_schema_after_round_trip():
+    from app.evaluation import evaluation_report_to_json
+
+    decoded = json.loads(evaluation_report_to_json(make_report()))
+
+    assert set(decoded) == {
+        "completed_trade_count",
+        "winning_trade_count",
+        "losing_trade_count",
+        "breakeven_trade_count",
+        "realized_pnl",
+        "win_rate",
+        "gross_profit",
+        "gross_loss",
+        "profit_factor",
+        "average_realized_pnl",
+    }
+    assert type(decoded["completed_trade_count"]) is int
+    for field in (
+        "realized_pnl",
+        "win_rate",
+        "gross_profit",
+        "gross_loss",
+        "profit_factor",
+        "average_realized_pnl",
+    ):
+        assert type(decoded[field]) is float, field
